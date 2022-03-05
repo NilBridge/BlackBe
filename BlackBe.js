@@ -65,7 +65,7 @@ function checkPieceList(e) {
                 if (res.data.status === 2000) {
                     res.data.data.piece_list.forEach(i => {
                         str += '=-------------=\n'
-                        str += '玩家名字：' + i.name + '\n违规信息：' + i.info + '\n作案时间：' + i.time + '\n玩家QQ：' + i.qq + '\n玩家手机号：' + i.phone + '\n'
+                        str += '玩家uuid：' + i.uuid + '玩家名字：' + i.name + '\n违规信息：' + i.info + '\n作案时间：' + i.time + '\n玩家QQ：' + i.qq + '\n玩家手机号：' + i.phone + '\n'
                         str += '=-------------=\n'
                     });
                     e.reply(str);
@@ -91,7 +91,7 @@ function qXUID(name) {
     })
 }
 
-function upload(args) {
+function uploadPiece(args) {
     let data = { "server": args[0], "name": args[1], "info": args[2], "black_id": args[3] }
 
     axios({
@@ -101,12 +101,34 @@ function upload(args) {
             "Content-Type": "application/json"
         },
         data: data
-    }).then(res => {
+    }).then(function(res){
         return res.data.message
-    }).catch(error => {
+    }).catch(function(error){
         return error.response.data.message
-    })
+    })    
+    // }).then(res => {
+    //     return res.data.message
+    // }).catch(error => {
+    //     return error.response.data.message
+    // })
     return "可能成功也可能没成功，但只要你输入参数正确那应该没问题，至于为什么等作者改2.0"
+}
+
+function deletePiece(args) {
+    let data = { "piece_uuid": args[0]}
+
+    axios({
+        method: 'post',
+        url: '/private/repositories/piece/delete',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        data: data
+    }).then(function(res){
+        return res.data.message
+    }).catch(function(error){
+        return error.response.data.message
+    })   
 }
 
 
@@ -131,7 +153,8 @@ function main(e) {
 function onStart() {
     NIL.FUNC.PLUGINS.GROUP.push(main);
 
-    NIL.NBCMD.regUserCmd("upload", upload);
+    NIL.NBCMD.regUserCmd("upload", uploadPiece);
+    NIL.NBCMD.regUserCmd("delete", deletePiece);
 
     NIL.Logger.info('BlackBe', '爷被加载辣');
 }
