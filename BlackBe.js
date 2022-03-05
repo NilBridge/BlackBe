@@ -55,16 +55,17 @@ function checkPl(e) {
 }
 
 function checkPieceList(e) {
-    let uuid = e.splice("库条目")[0]
-
+    let uuid = e.raw_message.split("库条目")[1]
     if(uuid != null && uuid != ''){
-        axios.get(url + '/check?qq=' + qq)
+        axios.get(url + '/private/repositories/piece/list?uuid=' + uuid)
             .then(res => {
                 let str = ''
                 e.reply(res.data.message)
-                if (res.data.data.exist == true) {
-                    res.data.data.info.forEach(i => {
-                        str += '\nID：' + i.name + '\n违规信息：' + i.info + '\n证据：' + JSON.stringify(i.photos)
+                if (res.data.status === 2000) {
+                    res.data.data.piece_list.forEach(i => {
+                        str += '=-------------=\n'
+                        str += '玩家名字：' + i.name + '\n违规信息：' + i.info + '\n作案时间：' + i.time + '\n玩家QQ：' + i.qq + '\n玩家手机号：' + i.phone + '\n'
+                        str += '=-------------=\n'
                     });
                     e.reply(str);
                 }
