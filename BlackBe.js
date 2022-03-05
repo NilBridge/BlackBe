@@ -1,5 +1,5 @@
 const axios = require('axios')
-const url = "https://api.blackbe.xyz/openapi/v3"
+const baseURL = "https://api.blackbe.xyz/openapi/v3"
 
 
 //请在此配置在云黑获取的token，否则某些功能不可用
@@ -9,13 +9,14 @@ const token = ""
 // 拦截器
 axios.interceptors.request.use(
     config => {
+        config.url = baseURL + config.url
         config.headers.Authorization = "Bearer " + token
         return config
     }
 )
 
 function checkList(e) {
-    axios.get(url + '/private/repositories/list')
+    axios.get('/private/repositories/list')
         .then(function (res) {
             let str = ''
             res.data.data.repositories_list.forEach(i => {
@@ -34,7 +35,7 @@ function checkPl(e) {
     let qq = NIL.TOOL.getAt(e)
 
     if (qq != null && qq != '') {
-        axios.get(url + '/check?qq=' + qq)
+        axios.get('/check?qq=' + qq)
             .then(res => {
                 let str = ''
                 e.reply(res.data.message)
@@ -56,8 +57,8 @@ function checkPl(e) {
 
 function checkPieceList(e) {
     let uuid = e.raw_message.split("库条目")[1]
-    if(uuid != null && uuid != ''){
-        axios.get(url + '/private/repositories/piece/list?uuid=' + uuid)
+    if (uuid != null && uuid != '') {
+        axios.get('/private/repositories/piece/list?uuid=' + uuid)
             .then(res => {
                 let str = ''
                 e.reply(res.data.message)
@@ -76,6 +77,36 @@ function checkPieceList(e) {
             })
         return
     }
+}
+
+function qXUID(name) {
+    axios({
+        method: 'get',
+        url: '/utils/xuid?gamertag=' + name,
+    }).then(res => {
+        console.log(res.data)
+        return res.data.data.xuid
+    }).catch(error => {
+        console.log(error)
+    })
+}
+
+function upload(args) {
+    let data = { "server": args[0], "name": args[1], "info": args[2], "black_id": args[3] }
+
+    axios({
+        method: 'post',
+        url: '/private/repositories/piece/upload',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        data: data
+    }).then(res => {
+        return res.data.message
+    }).catch(error => {
+        return error.response.data.message
+    })
+    return "可能成功也可能没成功，但只要你输入参数正确那应该没问题，至于为什么等作者改2.0"
 }
 
 
@@ -99,6 +130,9 @@ function main(e) {
 
 function onStart() {
     NIL.FUNC.PLUGINS.GROUP.push(main);
+
+    NIL.NBCMD.regUserCmd("upload", upload);
+
     NIL.Logger.info('BlackBe', '爷被加载辣');
 }
 
