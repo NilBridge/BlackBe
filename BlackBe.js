@@ -65,7 +65,7 @@ function checkPieceList(e) {
                 if (res.data.status === 2000) {
                     res.data.data.piece_list.forEach(i => {
                         str += '=-------------=\n'
-                        str += '玩家uuid：' + i.uuid + '玩家名字：' + i.name + '\n违规信息：' + i.info + '\n作案时间：' + i.time + '\n玩家QQ：' + i.qq + '\n玩家手机号：' + i.phone + '\n'
+                        str += '玩家uuid：' + i.uuid + '\n玩家名字：' + i.name + '\n违规信息：' + i.info + '\n作案时间：' + i.time + '\n玩家QQ：' + i.qq + '\n玩家手机号：' + i.phone + '\n'
                         str += '=-------------=\n'
                     });
                     e.reply(str);
@@ -79,21 +79,25 @@ function checkPieceList(e) {
     }
 }
 
-function qXUID(name) {
-    axios({
-        method: 'get',
-        url: '/utils/xuid?gamertag=' + name,
-    }).then(res => {
-        console.log(res.data)
-        return res.data.data.xuid
-    }).catch(error => {
-        console.log(error)
-    })
-}
 
 function uploadPiece(args) {
-    let data = { "server": args[0], "name": args[1], "info": args[2], "black_id": args[3] }
-
+    let data = {}
+    // let data = { "server": args[0], "name": args[1], "info": args[2], "black_id": args[3] }
+    switch (args.length) {
+        case 3:
+            data.server = args[0]
+            data.name = args[1]
+            data.black_id = args[2]
+            break;
+        case 4:
+            data.server = args[0]
+            data.name = args[1]
+            data.info = args[2]
+            data.black_id = args[3]
+            break;
+        default:
+            return "参数不足喔，输入多点参数，或者看看文档吧";
+    }
     axios({
         method: 'post',
         url: '/private/repositories/piece/upload',
@@ -101,11 +105,11 @@ function uploadPiece(args) {
             "Content-Type": "application/json"
         },
         data: data
-    }).then(function(res){
+    }).then(function (res) {
         return res.data.message
-    }).catch(function(error){
+    }).catch(function (error) {
         return error.response.data.message
-    })    
+    })
     // }).then(res => {
     //     return res.data.message
     // }).catch(error => {
@@ -115,7 +119,7 @@ function uploadPiece(args) {
 }
 
 function deletePiece(args) {
-    let data = { "piece_uuid": args[0]}
+    let data = { "piece_uuid": args[0] }
 
     axios({
         method: 'post',
@@ -124,11 +128,13 @@ function deletePiece(args) {
             "Content-Type": "application/json"
         },
         data: data
-    }).then(function(res){
+    }).then(function (res) {
         return res.data.message
-    }).catch(function(error){
+    }).catch(function (error) {
         return error.response.data.message
-    })   
+    })
+
+    return "可能成功也可能没成功，但只要你输入参数正确那应该没问题，至于为什么等作者改2.0"
 }
 
 
@@ -155,11 +161,12 @@ function onStart() {
 
     NIL.NBCMD.regUserCmd("upload", uploadPiece);
     NIL.NBCMD.regUserCmd("delete", deletePiece);
-
     NIL.Logger.info('BlackBe', '爷被加载辣');
 }
 
 function onStop() {
+    NIL.NBCMD.remUserCmd("upload");
+    NIL.NBCMD.remUserCmd("delete");
     NIL.Logger.info('BlackBe', '爷被卸载辣');
 }
 
